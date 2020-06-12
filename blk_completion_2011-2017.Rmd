@@ -1,0 +1,78 @@
+---
+title: "IPEDS Completion Data - Black Students - 2011-2017"
+author: "Clara Bicalho"
+date: "6/12/2020"
+output: pdf_document
+---
+
+<!-- <style type="text/css"> -->
+<!-- .table { -->
+
+<!--     width: 40%; -->
+
+<!-- } -->
+<!-- </style> -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(xtable)
+library(dplyr)
+```
+
+```{r import, message=FALSE, warning=FALSE}
+files <- paste0("data/C", 2011:2018, "_A.csv")
+dat <- do.call(plyr::rbind.fill, lapply(files, read_csv))
+
+ps <- dat %>% 
+  filter(
+    CIPCODE %in% c("45.1099", "45.1001", "45.1002", "45.1003", "45.1004") & 
+      UNITID %in% c(110635, 186131, 130794, 193900, 166027, 166683, 243744,
+                    110680, 110662, 170976, 199120, 190150, 198419, 144050,
+                    204796)) %>%
+  mutate(University = case_when(UNITID == 110635 ~ "UC Berkeley",
+                                UNITID == 186131 ~ "Princeton",
+                                UNITID == 130794 ~ "Yale",
+                                UNITID == 193900 ~ "NYU",
+                                UNITID == 166027 ~ "Harvard",
+                                UNITID == 166683 ~ "MIT",
+                                UNITID == 243744 ~ "Stanford",
+                                UNITID == 110680 ~ "UCSD",
+                                UNITID == 110662 ~ "UCLA",
+                                UNITID == 170976 ~ "UMich",
+                                UNITID == 199120 ~ "UNC-Chapel Hill",
+                                UNITID == 190150 ~ "Columbia",
+                                UNITID == 198419 ~ "Duke",
+                                UNITID == 144050 ~ "U Chicago",
+                                UNITID == 204796 ~ "Ohio State University"))
+```
+
+```{r summary}
+tab <- ps %>% group_by(University) %>% 
+  summarize(Total = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE),
+            Pct = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE)/
+              sum(CTOTALT[AWLEVEL == 17], na.rm=TRUE))
+```
+
+```{r, include=FALSE}
+# Undegrads
+# ps %>% group_by(University) %>% 
+#   summarize(Total = sum(CBKAAT[AWLEVEL == "05"], na.rm=TRUE),
+#             Pct = sum(CBKAAT[AWLEVEL == "05"], na.rm=TRUE)/
+#               sum(CTOTALT[AWLEVEL == "05"], na.rm=TRUE))
+
+# ps %>% select(CBKAAT, UNITID)
+# table(ps$AWLEVEL)
+```
+
+\centering
+\clearpage
+
+```{r export, echo=FALSE, results="asis"}
+exp_tab <- capture.output(print(
+  xtable(tab, caption = "Black Students Who Completed a Political Science PhD Program, Top 15 Programs (2011-2017)"), 
+  caption.placement = "top", include.rownames = FALSE, comment = FALSE,
+  header = FALSE))
+
+cat(exp_tab, sep = "\n")
+```
