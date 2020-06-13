@@ -23,4 +23,45 @@ tab <- d %>%
     ) %>%
     filter(Denom > 0)
 
-write_csv(tab, path="shiny_app/data/aggregated_data.csv")
+margin_field <- d %>%
+    group_by(CIPTitle) %>%
+    summarize(
+        INSTNM = "Overall",
+        Total = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE),
+        Pct = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE)/
+            sum(CTOTALT[AWLEVEL == 17], na.rm=TRUE),
+        Denom = sum(CTOTALT[AWLEVEL == 17], na.rm=TRUE)
+    ) %>%
+    filter(Denom > 0)
+
+margin_school <- d %>%
+    group_by(INSTNM) %>%
+    summarize(
+        CIPTitle = "Overall",
+        Total = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE),
+        Pct = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE)/
+            sum(CTOTALT[AWLEVEL == 17], na.rm=TRUE),
+        Denom = sum(CTOTALT[AWLEVEL == 17], na.rm=TRUE)
+    ) %>%
+    filter(Denom > 0)
+
+overall_margin <- d %>%
+    summarize(
+        CIPTitle = "Overall",
+        INSTNM = "Overall",
+        Total = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE),
+        Pct = sum(CBKAAT[AWLEVEL == 17], na.rm=TRUE)/
+            sum(CTOTALT[AWLEVEL == 17], na.rm=TRUE),
+        Denom = sum(CTOTALT[AWLEVEL == 17], na.rm=TRUE)
+    )
+
+all = bind_rows(
+        tab,
+        margin_field,
+        margin_school,
+        overall_margin
+    ) %>%
+    arrange(-Denom) %>%
+    filter(!is.na(CIPTitle), !is.na(INSTNM))
+
+write_csv(all, path="phd_diversity/data/aggregated_data.csv")
