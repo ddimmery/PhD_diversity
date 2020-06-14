@@ -9,7 +9,7 @@ data <- read_csv("data/aggregated_data.csv")
 
 fluidPage(
 
-  titlePanel("IPEDS PhD Completion Diversity Explorer, 2011 to 2018"),
+  titlePanel("Black graduates as proportion of total graduates, 2011 to 2018 (IPEDS)"),
 
   sidebarPanel(
       selectInput('schools', 'Schools', unique(data$INSTNM), multiple=TRUE, selected="Overall"),
