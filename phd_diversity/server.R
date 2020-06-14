@@ -32,7 +32,7 @@ function(input, output) {
     observe(output$plot <- renderPlot({
         dat = dataset()
         value = ifelse(input$percent, "Percent", "Total")
-        scale = ifelse(input$percent, scales::percent, scales::comma)
+        scale = ifelse(input$percent, scales::label_percent(accuracy = 1L), scales::comma)
 
         if(nrow(dat) == 0) {
             p <- ggplot(dat, aes(x=wrapped_name, y=value)) +
@@ -53,7 +53,7 @@ function(input, output) {
                 )
         } else {
             p <- ggplot(dataset(), aes(x=wrapped_name, y=value)) +
-                geom_point(size=2) +
+                geom_point(size=4) +
                 scale_x_discrete("School") +
                 scale_y_continuous(glue::glue("{value} identifying as 'Black' in IPEDS"), labels=scale, limits=c(0, NA)) +
                 facet_wrap(~CIPTitle, ncol=2) +
